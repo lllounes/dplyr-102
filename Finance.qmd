@@ -23,3 +23,27 @@ accounts <- vroom("data/account.csv")
 disp <- vroom("data/disp.csv")
 ```
 
+## Joining data tables
+A cllection of joining functions of the form `*_join`.   
+   
+### Inner join
+```{r}
+da <- inner_join(accounts,disp)
+```
+We observe that there is some kind of repitition, more redondant than the original data (e.g: line 2 and 3 are quite similar)
+
+```{r}
+cda <- inner_join(client, da) #We can't join multiple table, we have to do it progressivly
+```
+The problem here is that `district_id` is part of both DB but are not representing the same thing. Hence we have to differenciate them :
+
+```{r}
+cda <- inner_join(client, da, by=join_by(client_id), suffix=c("_home", "_bank"))
+```
+
+Here we have 2 `disctrict_id`, one for the client and the other for the bank. 
+
+
+
+
+
