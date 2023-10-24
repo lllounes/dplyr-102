@@ -41,7 +41,66 @@ The problem here is that `district_id` is part of both DB but are not representi
 cda <- inner_join(client, da, by=join_by(client_id), suffix=c("_home", "_bank"))
 ```
 
-Here we have 2 `disctrict_id`, one for the client and the other for the bank. 
+Here we have 2 `disctrict_id`, one for the client and the other for the bank.   
+   
+### Home disttric versus bank disctrict
+
+```{r}
+home_diff_bank <- cda |> filter(district_id_home != district_id_bank) |> nrow()
+```
+
+We observe that `r home_diff_bank` clients have a bank in another district as the one they live in. 
+
+```{r}
+cda |> 
+  group_by(account_id) |>
+  distinct(district_id_home) |>
+  summarise(N=n()) |>
+  filter(N>1)
+```
+
+### Gender gap ?
+```{r}
+client |> count(gender)
+```
+We see an almost perfect balance between Male and Female. 
+
+```{r}
+client |> 
+  ggplot(aes(y=gender)) + geom_bar()
+```
+```{r}
+# Other way to have the same graph : 
+client |> 
+  ggplot(aes(x=gender)) + geom_bar() + coord_flip()
+```
+
+```{r}
+cda |>
+  count(gender, type)
+```
+ 
+It seems that there is no gender gap at first.    
+   
+```{r}
+cda |>
+  count(gender, type) |>
+  group_by(gender) |>
+  mutate(freq=n/sum(n)) |>
+  select(-n) |>
+  ungroup() |>
+  pivot_wider(values_from=freq, names_from=type)
+```
+```{r}
+cda |>
+  ggplot(aes(y=gender, fill=type)) + geom_bar(position="fill")
+```
+
+
+```{r}
+chisq.test(cda |> pull(gender),
+           cda |> pull(type))
+```
 
 
 
